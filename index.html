@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>Create a heatmap layer</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.css' rel='stylesheet' />
+    <script src="./med-routes.js"></script>
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+</head>
+<body>
+
+<style>
+    #map {
+        position: fixed;
+        width:75%;
+    }
+    #text {
+        width: 25%;
+        margin-left: 75%;
+        font-family: sans-serif;
+        overflow-y: none;
+        background-color: #fafafa;
+    }
+    section {
+        padding:  25px 50px;
+        line-height: 25px;
+        border-bottom: 1px solid #ddd;
+        opacity: 0.25;
+        font-size: 13px;
+        min-height: 250px;
+    }
+    section.year {
+        font-size: 10vh;
+        text-align: center;
+    }
+    section.active {
+        opacity: 1;
+    }
+    section:last-child {
+        border-bottom: none;
+        margin-bottom: 50vh;
+    }
+
+    .cta {
+        display: inline-block;
+        font-family: 'Open Sans Condensed';
+        font-size: 1.35em;
+        line-height: 1em;
+        text-transform: uppercase;
+        padding: .35em .25em;
+        margin: 0 .25em;
+        vertical-align: middle;
+    }
+
+    .cta a {
+        color: #ffffff;
+        border-width: 2px;
+        border-color: #ffffff;
+        background-color: #e6373e;
+        padding: .25em .35em;
+        border-style: solid;
+        display: block;
+        text-decoration: none;
+        transition: .25s all ease-out;
+    }
+
+    .cta a:hover {
+        background-color: #ffffff;
+        color: #e6373e;
+    }
+
+    h3, h1, h2, a {
+        color: #fec718
+    }
+
+</style>
+
+<div id='map'></div>
+<div id="text">
+    <section id="introSection" class="active" data-year=1900>
+        <h1>A map about refugees</h1>
+        <p>
+            This map has been done as an entry to the <a href="https://www.mapbox.com/" target="_blank">Mapbox</a> 
+            <a href="https://www.mapbox.com/map-madness/" target="_blank">mapmadness 2018</a> challenge. It tries to shed some light to the refugee migrations around the 
+            world by giving a little of historical perspective first and talking about the mediterranean situation afterwards.
+        </p>
+        <p>
+            According to the <a href="http://un.org" target="_blank">UN</a> <b>refugges</b> are <i>persons recognized as refugees under the 1951 UN Convention/1967 Protocol, the 1969 OAU Convention, in accordance with the UNHCR Statute, persons granted a complementary form of protection and those granted temporary protection.</i>
+        </p>
+        <p>
+            The numbers used to generate this map come from the <a href="http://data.un.org/Data.aspx?d=UNHCR&f=indID%3AType-Ref" target="_blank">UN data portal</a> and 
+            include <i>groups of persons who are outside their country or territory of origin and who face protection risks similar to those of refugees, but for whom refugee 
+            status has, for practical or other reasons, not been ascertained</i>. <br>
+            Although the data is here presented as points it should be noted that the data should be considered from the country where the points are shown. Technical reasons 
+            on why this happens is explained in this blog post.
+        </p>
+        <h2>Has it been always like this?</h2>
+        <p>No, just scroll down to see the countries where people has left their home to an always difficult journey</p>
+    </section>
+    <section data-route="overview">
+        <h1>The Mediterranean <i>crisis</i></h1>
+        Although the mediterranean has always been a migration route, the number of people who cross to Europe from Africa or the middle East has increased a lot since 2015.
+        As seen in the <a href="http://missingmigrants.iom.int/region/mediterranean">Missing Migrants project</a>, which tracks the number of deaths in the mediterranean sea, 
+        the number of people who died trying has also increased. <br>
+        People who are pushed to leave their homes by war, such as Syrian, find themselves in the hands of smugglers who take advantage of refuggees by throwing them on a boat and 
+        leaving them at their luck after having to pay a hefty sum. People like Proactiva Open Arms, a NGO that works in the mediterranean rescuing migrants who are left to die, 
+        or the huge number of volunteers that work at refugee camps across Europe, bring a little bit of hope to these people. <br>
+        You can read more about these death routes <a href="https://www.theguardian.com/world/2017/sep/11/migrant-death-toll-rises-after-clampdown-on-east-european-borders" target="_blank">here</a>, 
+        or <a href="https://openmigration.org/en/analyses/the-mediterranean-why-so-many-deaths-at-sea-in-2016/" target="_blank">here</a>.
+    </section>
+    <section data-route="western-african">
+        <h1>Western African routes</h1>
+        The route between Senegal, Mauritania and Morocco and the Spanish Canary Islands was once the busiest irregular entry point for the whole of Europe, peaking at 
+        32000 migrants arriving on the islands in 2006.<br>
+        But the numbers dropped by 60 per cent in 2007 following bilateral agreements between Spain and Senegal and Mauritania, including repatriation agreements. 
+        Strengthened border controls, including the installation of the SIVE maritime surveillance system, also helped, along with the Frontex-coordinated Operation Hera.<br>
+        Migrants on this route were mostly from Morocco and Senegal, with others from Niger, Nigeria and Mali. They generally travelled in long wooden fishing boats, known as 
+        cayucos; migrants from Morocco use smaller fishing boats called pateras.<br>
+        The numbers continued to drop from 2007, until by 2012 there were just 170 arrivals in the Canaries. The figure remained stable for the next two years, although it rose to 
+        874 in 2015.<br>
+        The Moroccan smuggler operation is not well developed. Sea passages tend to be arranged by individuals working independently, serving clients who have made their own 
+        way to the coast rather than using the services of organised networks. Small boats found on Lanzarote containing very small numbers of migrants gave strong indications 
+        that drug smuggling was the primary goal of these journeys.
+    </section>
+    <section data-route="western-mediterranean">
+        <h1>Western Mediterranean routes</h1>
+        The Morocco to Spain route had been a noted pressure point for years – certainly since 2005, when thousands of sub-Saharan migrants made world headlines by trying to climb over the fence in the Spanish enclave of Melilla.
+        <br>
+Co-operation between Spain and Morocco has since kept migrant numbers comparatively low on this route. Migrants are also more inclined to depart from Libya because the likelihood of being returned by EU authorities is much lower.
+<br>
+A decade ago, migrants from Morocco to Spain were typically economic ones from Algeria and Morocco, hoping for jobs in Spain, France and Italy. Since then, however, they have increasingly been joined by sub-Saharan Africans, driven northwards by conflicts in Mali, Sudan, South Sudan, Cameroon, Nigeria, Chad and the Central African Republic. In 2015, Syrians accounted for the biggest share of detections on this route.
+<br>
+West Africans reach Morocco or Algeria via two land routes. One follows the West African coastline; the shorter one crosses the Sahara. The coastal route is naturally preferred by migrants leaving Senegal and Mauritania, but also, often, by nationals of countries further afield - such as Nigeria, Côte d’Ivoire or Benin - because the Sahara crossing is judged so dangerous.
+<br>
+There are various reasons for the fluctuation of overall numbers on this route. Spain has stepped up coastal patrols, installed the SIVE maritime surveillance system along its southern border and signed bilateral agreements with Mauritania and Senegal. It has also strengthened border checks at the main ports, a significant deterrent for would-be migrants secreting themselves aboard trucks and containers on ferries headed to Almeria and Algeciras – the traditional method of irregular entry. Rising unemployment in Spain, and therefore fewer opportunities for migrant workers, is also thought to be a factor.
+<br>
+Spanish border authorities do not only face challenges from irregular migrants. The Western Mediterranean route has also long been a major conduit for drug-smugglers moving cannabis and cocaine towards the lucrative markets of the EU. Evidence suggests that the speedboats traditionally deployed by the smugglers are increasingly being replaced by small planes and helicopters.
+    </section>
+    <section data-route="central-mediterranean">
+        <h1>Central Mediterranean routes</h1>
+        The Central Mediterranean route remained under intense migratory pressure in 2015, although the total number of migrants arriving in Italy fell to 154 000 - about a tenth lower than the record set in 2014. The main reasons for the drop were the shift of Syrians to the Eastern Mediterranean route and a shortage of boats faced by smugglers in the latter part of the year. Smuggling networks remain well established in Libya, where migrants gather before crossing the sea. In 2015 Eritreans, Nigerians and Somalis accounted for the biggest share of the migrants making the dangerous journey.
+        <br>
+People smugglers typically put migrants aboard old, unseaworthy fishing boats, or even small rubber dinghies, which are much overloaded and thus prone to capsizing. These vessels are generally equipped with poor engines, lack proper navigation systems and often have insufficient fuel to reach Europe. For these reasons, the vast majority of border control operations in the Central Mediterranean turn into Search and Rescue (SAR) operations.
+    </section>
+    <section data-route="apulia-calabria">
+        <h1>Apulia-Calabria route</h1>
+        Although not a major point of entry for irregular migrants, the open sea route to southern Italy remains a source of particular concern to border authorities.
+        <br>
+Irregular migrants picked up in Apulia tend to be travellers who previously entered the EU via Greece. Increasing numbers of migrants, usually from Asia, claim to have been living in Greece for months or years before deciding to leave for other EU Member States.
+<br>
+Those detected in Calabria usually come from Turkey or Egypt. Most are Syrians, although there have also been significant numbers of Pakistanis and Afghans, as well as Egyptians.
+<br>
+The peak year for this route was 2011 with 5259 detections of illegal border crossings, the year of the Arab Spring. The decline in numbers since then is attributed to a growing preference for the overland route through the Western Balkans.
+<br>
+The smuggling techniques used on this open sea passage are quite different from the flimsy dinghies typically seen in the calmer waters of the eastern Aegean. Smugglers attempting entry in Apulia often use ocean-going pleasure yachts. Migrants are hidden below the deck, often in dangerously crowded conditions with insufficient ventilation. In some cases, the boats are modified with additional wooden bunking in order to maximize capacity. Only a small crew is visible to coastguard patrols, sometimes accompanied by women to allay suspicion.
+<br>
+Smuggling networks from Egypt, on the other hand, used to use small fishing boats – but had switched to larger ‘mother ships’ instead, with strings of fishing boats towed behind. On departure from Egypt the migrants were stowed in the mother ship, which then stopped en route to collect further passengers. Once close to the Italian shore, the migrants were transferred to the fishing boats while the mother ship returns to port – a technique that naturally allowed smugglers to evade arrest.
+<br>
+In 2014, people smugglers in Turkey copied the trend for larger boats by employing decommissioned freighters, capable of holding as many as 600 people. Most depart the Turkish port of Mersin. The route from Turkey was not without dangers. The engines of the old freighters are often unreliable. The risk of shipwreck was also increased by the smugglers’ habit of switching off the boat’s AIS (Automatic Identification System). This made it electronically invisible to the authorities - but also to other boats and vessels navigating the Mediterranean. On numerous occasions, smuggler crews set the vessels on autopilot and then either abandoned ship, or hid themselves among other passengers to avoid arrest. 
+<br>
+The trend had subsided in 2015 as migrants instead used the Eastern Mediterranean route.
+    </section>
+    <section data-route="eastern-mediterranean">
+        <h1>Eastern Mediterranean routes</h1>
+        In 2015, some 885,000 migrants arrived in the EU via the Eastern Mediterranean route – 17 times the number in in 2014, which was itself a record year. The vast majority of them arrived on several Greek islands, most on Lesbos. The numbers increased gradually from January to March, but began to climb in April, peaking at 216 000 in October. The numbers eased slightly in November and December with the onset of winter, but were still well above the figures from the same months of 2014. 
+        <br>
+Throughout 2015 Frontex deployed an increased number of officers and vessels to the Greek islands to assist in patrolling the sea and registering the thousands of migrants arriving daily. In December, the agency launched Poseidon Rapid Intervention after the Greek authorities requested additional assistance at its borders.
+<br>
+Most of the migrants on this route in 2015 originated from Syria, followed by Afghanistan and Somalia. There are also increasing numbers of migrants coming from sub-Saharan Africa. Most of the migrants continued their journeys north, leaving Greece through its border with the former Yugoslav Republic of Macedonia. Frontex also deploys officers at Greece’s northern land border to assist in registering exiting migrants.
+    </section>
+    <section>
+        <h1>Resources</h1>
+        <ul>
+            <li>
+                <a href="http://data.un.org/Data.aspx?d=UNHCR&f=indID%3AType-Ref" target="_blank">Refugee data in the UN data portal</a>
+            </li>
+            <li>
+                <a href="https://www.foodandmigration.com/en/chapters/routes-of-trans-mediterranean-migration/" target="_blank">Routes of Trans-Mediterranean migration</a>
+            </li>
+            <li>
+                <a href="http://data2.unhcr.org/en/situations/mediterranean" target="_blank">UNHCR operational portal information about the mediterranean situation</a>
+            </li>
+            <li>
+                <a href="http://migration.iom.int/europe/" target="_blank">Migration flows by the International Organization for Migration</a>
+            </li>
+            <li>
+                <a href="https://frontex.europa.eu/" target="_blank">Frontex: European and Coast Guard Agency</a>
+            </li>
+            <li>
+                <a href="https://www.gooverseas.com/blog/how-to-volunteer-abroad-with-refugees" target="_blank">Volunteering resources</a>
+            </li>
+            <li>
+                <a href="https://www.proactivaopenarms.org/en" target="_blank">Proactiva Open Arms NGO</a> 
+                <div class="cta">
+                    <a href="https://www.proactivaopenarms.org/en/donate" target="_blank">Donate now</a>
+                </div>
+            </li>
+        </ul>
+    </section>
+</div>
+
+<script>
+    
+    const heatmapLayer = "expats-heat";
+    const routesLayer = "med-routes";
+    const expatsCamera = {
+        pitch: 0,
+        center: [15, 20],
+        zoom: 2,
+    };
+    const expatsMinZoom = 2;
+    const expatsMaxZoom = 4;
+    const routeCameras = {
+        'overview': {
+            center: [8.580880442420607, 29.083451721536008],
+            zoom: 4
+        },
+        'western-african': {
+            center: [-15.356480660624243, 22.060375963826985],
+            zoom: 5,
+        },
+        'western-mediterranean': {
+            center: [-2.966851583297398, 36.92064250083499],
+            zoom: 6.25,
+        },
+        'central-mediterranean': {
+            center: [10.992967416759598, 36.581608719817595],
+            zoom: 5.95,
+        },
+        'apulia-calabria': {
+            center: [23.937725102851118, 35.71754027915246],
+            zoom: 5.8,
+        },
+        'eastern-mediterranean': {
+            center: [30.78690777109648, 36.087632013896524],
+            zoom: 5.6,
+        }
+    };
+    const routesMinZoom = 4;
+    const routesMaxZoom = 22;
+    const numRoutes = 18;
+    const maxSteps = 100;
+
+    let hasBeenLoaded = false;
+    let sections; 
+    let map;
+    let currentRoute;
+    let iconPoints;
+
+    init();
+
+    function init() {
+
+        addSections();
+        document.addEventListener("scroll", checkSlide);
+
+        mapboxgl.accessToken = 'pk.eyJ1IjoiaWJlc29yYSIsImEiOiJjajNkYzFjZXAwMDAwMndwY2w4bDUyN2VtIn0.q1VJCpeta1ZYDNNZJcyPbw';
+        map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/ibesora/cjfmf1hgc0vzv2ro0z5gvfiih',
+            center: [15, 20],
+            zoom: 2,
+            minZoom: expatsMinZoom,
+            maxZoom: expatsMaxZoom
+        });
+
+         map.on('load', function() {
+
+            hasBeenLoaded = true;
+            map.addSource('expats', {
+                "type": "vector",
+                "url": "mapbox://ibesora.clptnfe6"
+            });
+
+            map.addSource("mediterranean-routes", {
+                "type": "geojson",
+                "data": routesData
+            });
+
+            iconPoints = [];
+            for(let i=0; i<numRoutes; ++i) {
+
+                iconPoints.push({
+                    coords: [],
+                    currentStep: 0,
+                    currentVertexIndex: 0,
+                    visible: false
+                });
+
+                map.addSource(`point${i}`, {
+                    "type": "geojson",
+                    "data": {
+                        "type": "Feature",
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [0, 0]
+                        }
+                    }
+                });
+
+                map.addLayer({
+                    "id": `point-layer${i}`,
+                    "source": `point${i}`,
+                    "type": "symbol",
+                    "layout": {
+                        "visibility": "none",
+                        "icon-image": "ferry-15",
+                        "icon-allow-overlap": true
+                    }
+                });
+
+            }
+
+            const currentYear = document.querySelector("section.active").dataset.year;
+            map.addLayer({
+                "id": heatmapLayer,
+                "type": "heatmap",
+                "source": "expats",
+                "source-layer": "expats_1975-2016_complete-5gcd0o",
+                "maxzoom": 7,
+                "filter": ["==", "year", parseInt(currentYear)],
+            }, 'waterway-label');
+
+            map.addLayer({
+                "id": routesLayer,
+                "type": "line",
+                "source": "mediterranean-routes",
+                "layout": {
+                    "visibility": "none"
+                },
+                "paint": {
+                    "line-color": "hsl(42, 97%, 62%)", 
+                    "line-dasharray": [5, 5], 
+                    "line-width": 3, 
+                    "line-blur": 0
+                }
+            }, 'waterway-label');
+
+        });
+
+    }
+
+    function addSections() {
+
+        addYearSections();
+
+    }
+
+    function addYearSections() {
+
+        let sectionArray = [];
+        const text = document.querySelector("#text");
+        const firstSection = document.querySelector("#introSection");
+
+        for (let i=2016; i>=1975; --i) {
+
+            text.insertBefore(buildYearSection(i), firstSection.nextSibling);
+
+        }
+
+        sections = document.querySelectorAll("section");
+
+    }
+
+    function buildYearSection(year) {
+
+        const section = document.createElement('section');
+        section.dataset.year = year;
+        section.classList.add("year");
+        section.innerHTML = `<h3>${year}</h3>`;
+
+        return section;
+
+    }
+
+    function checkSlide() {
+
+        let nearestSectionToCenter;
+        let minDistanceToCenter = Infinity;
+
+        sections.forEach((section, index) => {
+
+            const halfSectionHeight = section.offsetTop + section.clientHeight / 2.0;
+            const halfWindowHeight = window.scrollY + window.innerHeight / 2.0;
+            const halfWindowToHalfSectionDistance = Math.abs(halfSectionHeight - halfWindowHeight);
+
+            if (halfWindowToHalfSectionDistance < minDistanceToCenter) {
+
+                minDistanceToCenter = halfWindowToHalfSectionDistance;
+                nearestSectionToCenter = section;
+
+            }
+
+        });
+
+        const activeSection = document.querySelector(".active");
+        activeSection.classList.remove("active");
+        nearestSectionToCenter.classList.add("active");
+
+        performOperation(nearestSectionToCenter);
+
+    }
+
+    function performOperation(element) {
+
+        if(element.dataset.hasOwnProperty("year")) {
+
+            changeFilterYear(parseInt(element.dataset.year));
+
+        } else if(element.dataset.hasOwnProperty("route")) {
+
+            changeRoute(element.dataset.route);
+
+        }
+
+    }
+
+    function changeFilterYear(year) {
+
+        setExpatsMode();
+
+        if(hasBeenLoaded)
+            map.setFilter(heatmapLayer, ["==", "year", year]);
+
+    }
+
+    function changeRoute(route) {
+
+        setRoutesMode();
+
+        if(hasBeenLoaded && route !== "") {
+
+            map.flyTo(routeCameras[route]);
+
+            if(route === "overview")
+                map.setFilter(routesLayer, null);
+            else {
+
+                map.setFilter(routesLayer, ["==", "route", route]);
+                resetPoints();
+
+            }
+
+            currentRoute = route;
+
+        }
+
+    }
+
+    function setExpatsMode() {
+
+        var visibility = map.getLayoutProperty(heatmapLayer, 'visibility');
+        if (visibility !== "visible") {
+
+            map.setLayoutProperty(heatmapLayer, "visibility", "visible");
+            map.setLayoutProperty(routesLayer, "visibility", "none");
+            map.setMaxZoom(expatsMaxZoom);
+            map.setMinZoom(expatsMinZoom);
+            map.flyTo(expatsCamera);
+
+            for(let i=0; i<numRoutes; ++i) {
+
+                map.setLayoutProperty(`point-layer${i}`, "visibility", "none");
+
+            }
+
+        }
+
+    }
+
+    function setRoutesMode() {
+
+        var visibility = map.getLayoutProperty(routesLayer, 'visibility');
+        if (visibility !== "visible") {
+
+            map.setLayoutProperty(heatmapLayer, "visibility", "none");
+            map.setLayoutProperty(routesLayer, "visibility", "visible");
+            map.setMaxZoom(routesMaxZoom);
+            map.setMinZoom(routesMinZoom);
+
+        }
+
+    }
+
+    function resetPoints() {
+
+        lines = map.queryRenderedFeatures({layers: [routesLayer], filter:  ["==", "route", currentRoute]});
+        for(let i=0; i<lines.length; ++i) {
+
+            map.setLayoutProperty(`point-layer${i}`, "visibility", "visible");
+            iconPoints[i].visible = true;
+            iconPoints[i].coords = lines[i].geometry.coordinates;
+            iconPoints[i].currentStep = 0;
+            iconPoints[i].currentVertexIndex = 0;
+
+        }
+
+        for(let i=lines.length; i<numRoutes; ++i) {
+
+            map.setLayoutProperty(`point-layer${i}`, "visibility", "none");
+            iconPoints[i].visible = false;
+
+        }
+
+        updatePoints();
+
+    }
+
+    function updatePoints() {
+
+        for(let i=0; i<numRoutes; ++i) {
+
+            const current = iconPoints[i];
+            if(current.visible) {
+
+                const previousVertex = current.coords[current.currentVertexIndex];
+                const nextVertex = current.coords[(current.currentVertexIndex + 1) % current.coords.length];
+                const xDir = nextVertex[0] - previousVertex[0];
+                const yDir = nextVertex[1] - previousVertex[1];
+                current.currentStep++;
+                
+                current.currentCoords = [previousVertex[0] + xDir/maxSteps*current.currentStep, previousVertex[1] + yDir/maxSteps*current.currentStep];
+                map.getSource(`point${i}`).setData({"type": "Point", "coordinates": current.currentCoords});
+
+                if(current.currentStep == maxSteps) {
+                    current.currentStep = 0;
+                    current.currentVertexIndex++;
+
+                    if(current.currentVertexIndex == current.coords.length-1)
+                        current.currentVertexIndex = 0;
+
+                }
+
+            }
+
+        }
+
+        if(currentRoute !== "overview")
+            requestAnimationFrame(updatePoints);
+
+    }
+
+</script>
+
+</body>
+</html>

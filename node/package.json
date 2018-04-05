@@ -1,0 +1,15 @@
+{
+  "name": "group-csv",
+  "version": "1.0.0",
+  "description": "A small script to group rows with the same value in one",
+  "main": "groupCSV.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ibesora",
+  "license": "MIT",
+  "dependencies": {
+    "async": "^2.6.0",
+    "csv-parse": "^2.1.0"
+  }
+}
